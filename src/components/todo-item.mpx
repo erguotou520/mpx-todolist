@@ -1,0 +1,49 @@
+<template>
+  <view class="todo li"
+    wx:class="{{{ completed: todo.completed, editing: todo == editedTodo }}}"
+  >
+    <view class="view">
+      <checkbox class="toggle" wx:model="{{todo.completed}}" />
+      <text bind:longpress="editTodo(todo)">{{ todo.title }}</text>
+      <button class="destroy" bind:tap="removeTodo(todo)"></button>
+    </view>
+    <input
+      class="edit"
+      type="text"
+      wx:model="{{todo.title}}"
+      bind:blur="doneEdit(todo)"
+      bind:confirm="doneEdit(todo)"
+    />
+  </view>
+</template>
+
+<script>
+import { createComponent } from '@mpxjs/core'
+
+createComponent({
+  props: {
+    todo: Object,
+    editedTodo: Object
+  },
+  data: {
+
+  },
+  methods: {
+    editTodo () {},
+    removeTodo () {},
+    doneEdit () {}
+  }
+})
+</script>
+
+<style lang="stylus">
+.list {
+  background-color: red;
+}
+</style>
+
+<script name="json">
+module.exports = {
+  component: true
+}
+</script>

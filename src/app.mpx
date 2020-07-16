@@ -1,0 +1,21 @@
+<script>
+import mpx, { createApp } from '@mpxjs/core'
+import apiProxy from '@mpxjs/api-proxy'
+
+mpx.use(apiProxy, { usePromise: true })
+// app.js
+createApp({
+  onLaunch () {}
+})
+</script>
+
+<style lang="stylus">
+@import './assets/styles/todo.css';
+</style>
+
+
+<script name="json">
+module.exports = {
+  pages: ['./pages/index']
+}
+</script>

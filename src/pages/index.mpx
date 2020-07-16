@@ -1,0 +1,79 @@
+<template>
+  <view class="todoapp">
+    <view class="view">
+      <view class="h1">todos</view>
+      <input
+        class="new-todo"
+        autofocus
+        autocomplete="off"
+        placeholder="What needs to be done?"
+        v-model="newTodo"
+        @keyup.enter="addTodo"
+      />
+    </view>
+    <view class="main" v-show="todos.length" v-cloak>
+      <input
+        id="toggle-all"
+        class="toggle-all"
+        type="checkbox"
+        v-model="allDone"
+      />
+      <text for="toggle-all"></text>
+      <view class="todo-list">
+
+      </view>
+    </view>
+    <view class="view" v-show="todos.length" v-cloak>
+      <span class="todo-count">
+        <text class="strong">{{ remaining }}</text> {{ remaining | pluralize }} left
+      </span>
+      <view class="filters">
+        <view>
+          <a href="#/all" :class="{ selected: visibility == 'all' }">All</a>
+        </view>
+        <view>
+          <a href="#/active" :class="{ selected: visibility == 'active' }"
+            >Active</a
+          >
+        </view>
+        <view>
+          <a
+            href="#/completed"
+            :class="{ selected: visibility == 'completed' }"
+            >Completed</a
+          >
+        </view>
+      </view>
+      <button
+        class="clear-completed"
+        @click="removeCompleted"
+        v-show="todos.length > remaining"
+      >
+        Clear completed
+      </button>
+    </view>
+  </view>
+  <view class="info">
+    <p>Double-click to edit a todo</p>
+    <p>Written by <a href="http://blog.erguotou.me">erguotou</a></p>
+    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  import dll from '../lib/dll'
+  console.log(dll)
+
+  createPage({
+    onLoad () {}
+  })
+</script>
+
+<script type="application/json">
+  {
+    "usingComponents": {
+      "todo-item": "../components/todo-item"
+    }
+  }
+</script>
