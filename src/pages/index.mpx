@@ -7,73 +7,171 @@
         autofocus
         autocomplete="off"
         placeholder="What needs to be done?"
-        v-model="newTodo"
-        @keyup.enter="addTodo"
+        wx:model="{{newTodo}}"
+        bind:confirm="addTodo"
       />
     </view>
-    <view class="main" v-show="todos.length" v-cloak>
-      <input
-        id="toggle-all"
-        class="toggle-all"
-        type="checkbox"
-        v-model="allDone"
-      />
-      <text for="toggle-all"></text>
+    <view class="main" hidden="{{!todos.length}}">
+      <checkbox id="toggle-all" class="toggle-all" wx:model="{{allDone}}" />
+      <label for="toggle-all"></label>
       <view class="todo-list">
-
+        <view class="todo li" wx:for="{{todos}}" wx:for-item="todo" wx:key="id"
+          wx:class="{{{ completed: todo.completed, editing: todo == editedTodo }}}"
+        >
+          <view class="view">
+            <checkbox class="toggle" wx:model="{{todo.completed}}" />
+            <view class="label" bind:tap="editTodo(todo)">{{ todo.title }}</view>
+            <button class="destroy" bind:tap="removeTodo(todo)"></button>
+          </view>
+          <input
+            class="edit"
+            type="text"
+            wx:model="{{todo.title}}"
+            bind:blur="cancelEdit(todo)"
+            bind:confirm="doneEdit(todo)"
+          />
+        </view>
       </view>
     </view>
-    <view class="view" v-show="todos.length" v-cloak>
-      <span class="todo-count">
-        <text class="strong">{{ remaining }}</text> {{ remaining | pluralize }} left
-      </span>
+    <view class="view" hidden="{{!todos.length}}">
+      <text class="todo-count">
+        <text class="strong">{{ remaining }}</text> left
+      </text>
       <view class="filters">
-        <view>
-          <a href="#/all" :class="{ selected: visibility == 'all' }">All</a>
-        </view>
-        <view>
-          <a href="#/active" :class="{ selected: visibility == 'active' }"
-            >Active</a
+        <text class="li">
+          <text class="a" wx:class="{{{ selected: visibility == 'all' }}}">All</text>
+        </text>
+        <text class="li">
+          <text class="a" wx:class="{{{ selected: visibility == 'active' }}}"
+            >Active</text
           >
-        </view>
-        <view>
-          <a
-            href="#/completed"
-            :class="{ selected: visibility == 'completed' }"
-            >Completed</a
+        </text>
+        <text class="li">
+          <text class="a"
+            wx:class="{{{ selected: visibility == 'completed' }}}"
+            >Completed</text
           >
-        </view>
+        </text>
       </view>
       <button
         class="clear-completed"
-        @click="removeCompleted"
-        v-show="todos.length > remaining"
+        bind:tap="removeCompleted"
+        hidden="{{todos.length <= remaining}}"
       >
-        Clear completed
+        Clear
       </button>
     </view>
   </view>
   <view class="info">
-    <p>Double-click to edit a todo</p>
-    <p>Written by <a href="http://blog.erguotou.me">erguotou</a></p>
-    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+    <view>Longpress to edit a todo</view>
+    <view>Written by <text class="a" href="http://blog.erguotou.me">erguotou</text></view>
+    <view>Part of <text class="a" href="http://todomvc.com">TodoMVC</text></view>
   </view>
 </template>
 
 <script>
-  import { createPage } from '@mpxjs/core'
-  import dll from '../lib/dll'
-  console.log(dll)
+import { createPage } from '@mpxjs/core'
+import { fetch, save } from '../utils/storage.js'
+import { generateId } from '../utils'
 
-  createPage({
-    onLoad () {}
-  })
+// visibility filters
+const filters = {
+  all: function (todos) {
+    return todos
+  },
+  active: function (todos) {
+    return todos.filter(function (todo) {
+      return !todo.completed
+    })
+  },
+  completed: function (todos) {
+    return todos.filter(function (todo) {
+      return todo.completed
+    })
+  }
+}
+
+createPage({
+  data: {
+    todos: fetch(),
+    newTodo: '',
+    editedTodo: null,
+    visibility: 'all'
+  },
+  computed: {
+    filteredTodos () {
+      return filters[this.visibility](this.todos)
+    },
+    remaining () {
+      return filters.active(this.todos).length
+    },
+    allDone: {
+      get () {
+        return this.remaining === 0
+      },
+      set (value) {
+        this.todos.forEach(todo => {
+          todo.completed = value
+        })
+      }
+    }
+  },
+  watch: {
+    todos: {
+      handler (todos) {
+        save(todos)
+      },
+      deep: true
+    }
+  },
+  methods: {
+    addTodo: function () {
+      var value = this.newTodo && this.newTodo.trim()
+      if (!value) {
+        return
+      }
+      this.todos.push({
+        id: generateId(),
+        title: value,
+        completed: false
+      })
+      this.newTodo = ''
+    },
+
+    removeTodo (todo) {
+      this.todos.splice(this.todos.indexOf(todo), 1)
+    },
+
+    editTodo (todo) {
+      this.beforeEditCache = todo.title
+      this.editedTodo = todo
+    },
+
+    doneEdit (todo) {
+      if (!this.editedTodo) {
+        return
+      }
+      this.editedTodo = null
+      todo.title = todo.title.trim()
+      if (!todo.title) {
+        this.removeTodo(todo)
+      }
+    },
+
+    cancelEdit (todo) {
+      this.editedTodo = null
+      todo.title = this.beforeEditCache
+    },
+
+    removeCompleted () {
+      this.todos = filters.active(this.todos)
+    }
+  },
+  onLoad () {}
+})
 </script>
 
-<script type="application/json">
-  {
-    "usingComponents": {
-      "todo-item": "../components/todo-item"
-    }
-  }
+<script name="json">
+module.exports = {
+}
 </script>

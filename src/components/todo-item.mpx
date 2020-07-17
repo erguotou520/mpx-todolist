@@ -4,15 +4,15 @@
   >
     <view class="view">
       <checkbox class="toggle" wx:model="{{todo.completed}}" />
-      <text bind:longpress="editTodo(todo)">{{ todo.title }}</text>
-      <button class="destroy" bind:tap="removeTodo(todo)"></button>
+      <label bind:longpress="editTodo">{{ todo.title }}</label>
+      <button class="destroy" bind:tap="removeTodo"></button>
     </view>
     <input
       class="edit"
       type="text"
       wx:model="{{todo.title}}"
-      bind:blur="doneEdit(todo)"
-      bind:confirm="doneEdit(todo)"
+      bind:blur="cancelEdit"
+      bind:confirm="doneEdit"
     />
   </view>
 </template>
@@ -29,9 +29,30 @@ createComponent({
 
   },
   methods: {
-    editTodo () {},
-    removeTodo () {},
-    doneEdit () {}
+    removeTodo (todo) {
+      this.todos.splice(this.todos.indexOf(todo), 1)
+    },
+
+    editTodo (todo) {
+      this.beforeEditCache = todo.title
+      this.editedTodo = todo
+    },
+
+    doneEdit (todo) {
+      if (!this.editedTodo) {
+        return
+      }
+      this.editedTodo = null
+      todo.title = todo.title.trim()
+      if (!todo.title) {
+        this.removeTodo(todo)
+      }
+    },
+
+    cancelEdit (todo) {
+      this.editedTodo = null
+      todo.title = this.beforeEditCache
+    }
   }
 })
 </script>

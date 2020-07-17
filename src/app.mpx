@@ -1,6 +1,7 @@
 <script>
 import mpx, { createApp } from '@mpxjs/core'
 import apiProxy from '@mpxjs/api-proxy'
+import './mixins'
 
 mpx.use(apiProxy, { usePromise: true })
 // app.js
@@ -11,6 +12,10 @@ createApp({
 
 <style lang="stylus">
 @import './assets/styles/todo.css';
+page {
+  padding: 30rpx;
+  width: auto;
+}
 </style>
 
 
